@@ -13,3 +13,6 @@ Petit jeu web qui mesure ton temps de réaction, dans le style d'[OmriTweaks](ht
 Clique pour lancer. L'écran passe au rouge (« Attends… »), puis au **orange** : clique le plus vite possible. Le temps s'affiche en millisecondes et le meilleur score est gardé en mémoire. Marche à la souris, au doigt ou avec la barre **Espace**.
 
 Moins de 250 ms, c'est du très bon niveau.
+
+## Suivi des erreurs
+Le jeu envoie ses erreurs à [Sentry](https://sentry.io) (projet « Jeu Réflexe »), via le SDK navigateur chargé dans `index.html`. Le bouton **« Déclencher une erreur »** provoque une erreur de test, visible dans Sentry → Issues.
