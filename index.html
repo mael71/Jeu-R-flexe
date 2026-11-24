@@ -49,16 +49,17 @@
   #errbar{display:none;position:fixed;left:0;right:0;top:0;z-index:10;
     background:#7a1d0e;color:#fff;font-weight:bold;font-size:14px;padding:12px 16px;text-align:center}
 </style>
-<!-- Sentry : suivi des erreurs du jeu (projet « Jeu Réflexe »). -->
+<!-- Sentry : suivi des erreurs du jeu (projet « Jeu Réflexe »). SDK complet, pas le loader. -->
+<script src="https://browser.sentry-cdn.com/8.55.0/bundle.min.js" crossorigin="anonymous"></script>
 <script>
-  window.sentryOnLoad = function () {
+  if (window.Sentry) {
     Sentry.init({
+      dsn: "https://c440380ec0aa1f2cf8b33b4e15154a54@o4512486347243520.ingest.de.sentry.io/4512487643938896",
       release: "jeu-reflexe@1.0.0",
       environment: "production"
     });
-  };
+  }
 </script>
-<script src="https://js.sentry-cdn.com/c440380ec0aa1f2cf8b33b4e15154a54.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <div id="errbar"></div>
