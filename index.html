@@ -43,9 +43,15 @@
   footer{padding:10px 20px 20px;text-align:center;color:var(--mut);font-size:12px}
   footer b{color:var(--txt)}
   .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:middle}
+  #bug{margin-top:12px;background:none;border:2px solid var(--border);color:var(--mut);
+    font:inherit;font-size:13px;font-weight:bold;padding:9px 18px;border-radius:999px;cursor:pointer}
+  #bug:hover{border-color:var(--accent);color:var(--accent)}
+  #errbar{display:none;position:fixed;left:0;right:0;top:0;z-index:10;
+    background:#7a1d0e;color:#fff;font-weight:bold;font-size:14px;padding:12px 16px;text-align:center}
 </style>
 </head>
 <body>
+  <div id="errbar"></div>
   <header>
     <h1>Test de <span>réflexes</span> <span class="dot"></span></h1>
     <p>Clique dès que l'écran passe au orange</p>
@@ -57,7 +63,10 @@
       <div class="sub" id="padSub">On teste ta vitesse de réaction en millisecondes.</div>
     </div>
   </main>
-  <footer>Astuce : appuie aussi sur <b>Espace</b> · moins de <b>250 ms</b>, c'est du très bon niveau.</footer>
+  <footer>
+    Astuce : appuie aussi sur <b>Espace</b> · moins de <b>250 ms</b>, c'est du très bon niveau.<br>
+    <button id="bug" type="button">Déclencher une erreur</button>
+  </footer>
 
 <script>
 (function(){
@@ -140,6 +149,16 @@
   pad.addEventListener('touchstart',function(e){e.preventDefault();trigger();},{passive:false});
   document.addEventListener('keydown',function(e){
     if(e.code==='Space'||e.key===' '){ e.preventDefault(); trigger(); }
+  });
+
+  // Bouton de test : provoque une vraie erreur JavaScript, affichée dans la barre rouge.
+  var errbar=document.getElementById('errbar');
+  window.addEventListener('error',function(ev){
+    errbar.textContent='Erreur : '+(ev.message||'inconnue');
+    errbar.style.display='block';
+  });
+  document.getElementById('bug').addEventListener('click',function(){
+    throw new Error("Erreur de test déclenchée par le bouton (jeu Réflexe)");
   });
 
   loadBest(); toIdle();
