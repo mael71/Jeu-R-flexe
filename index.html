@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Test de réflexes</title>
+<style>
+  :root{
+    --bg:#0B0C10; --card:#15171E; --border:#272B35;
+    --accent:#FF5A24; --accent2:#FF8A3D; --txt:#FFFFFF; --mut:#9BA1AC;
+    --wait:#2a0f0a; --wait-br:#5a2416; --go:#FF5A24;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--txt);
+    font-family:'DejaVu Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;min-height:100%;overflow:hidden;
+    user-select:none;
+  }
+  header{padding:18px 20px 8px;text-align:center}
+  header h1{font-size:20px;letter-spacing:.5px}
+  header h1 span{color:var(--accent)}
+  header p{color:var(--mut);font-size:13px;margin-top:4px}
+  #best{margin-top:10px;display:inline-block;border:2px solid var(--border);
+    background:var(--card);border-radius:999px;padding:6px 16px;font-size:14px;font-weight:bold}
+  #best b{color:var(--accent)}
+  main{flex:1;padding:16px;display:flex}
+  #pad{
+    flex:1;border-radius:28px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:14px;cursor:pointer;
+    background:var(--card);border:2px solid var(--border);
+    transition:background .08s ease,border-color .08s ease;text-align:center;padding:24px;
+  }
+  #pad.wait{background:var(--wait);border-color:var(--wait-br)}
+  #pad.go{background:var(--go);border-color:var(--accent2)}
+  #pad.go .big,#pad.go .sub{color:#0B0C10}
+  .big{font-size:40px;font-weight:bold;line-height:1.15}
+  .sub{font-size:17px;color:var(--mut);max-width:16em}
+  #ms{font-size:76px;font-weight:bold;color:var(--accent)}
+  #ms small{font-size:28px;color:var(--mut);font-weight:bold}
+  #verdict{font-size:18px;font-weight:bold}
+  footer{padding:10px 20px 20px;text-align:center;color:var(--mut);font-size:12px}
+  footer b{color:var(--txt)}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Test de <span>réflexes</span> <span class="dot"></span></h1>
+    <p>Clique dès que l'écran passe au orange</p>
+    <div id="best">Meilleur : <b id="bestVal">—</b></div>
+  </header>
+  <main>
+    <div id="pad" role="button" tabindex="0" aria-live="polite">
+      <div class="big" id="padBig">Clique pour commencer</div>
+      <div class="sub" id="padSub">On teste ta vitesse de réaction en millisecondes.</div>
+    </div>
+  </main>
+  <footer>Astuce : appuie aussi sur <b>Espace</b> · moins de <b>250 ms</b>, c'est du très bon niveau.</footer>
+
+<script>
+(function(){
+  var pad=document.getElementById('pad');
+  var big=document.getElementById('padBig');
+  var sub=document.getElementById('padSub');
+  var bestVal=document.getElementById('bestVal');
+  var state='idle';        // idle | waiting | go | result | tooSoon
+  var timer=null, startTime=0;
+  var KEY='reflexe_best_ms';
+
+  function loadBest(){
+    try{var v=localStorage.getItem(KEY); if(v) bestVal.textContent=v+' ms';}catch(e){}
+  }
+  function saveBest(ms){
+    try{
+      var cur=localStorage.getItem(KEY);
+      if(!cur || ms<parseInt(cur,10)){ localStorage.setItem(KEY,ms); return true; }
+    }catch(e){}
+    return false;
+  }
+  function verdict(ms){
+    if(ms<200) return "Réflexes de pro";
+    if(ms<250) return "Excellent !";
+    if(ms<320) return "Très bien";
+    if(ms<400) return "Correct";
+    return "À réveiller un peu";
+  }
+
+  function setPad(cls){ pad.className=cls||''; }
+
+  function toIdle(){
+    state='idle'; setPad('');
+    big.textContent='Clique pour commencer';
+    big.style.fontSize='40px';
+    sub.textContent="On teste ta vitesse de réaction en millisecondes.";
+    sub.style.display='';
+  }
+  function startWaiting(){
+    state='waiting'; setPad('wait');
+    big.textContent='Attends…';
+    big.style.fontSize='40px';
+    sub.textContent='Ne clique pas encore. Prépare-toi.';
+    sub.style.display='';
+    var delay=1200+Math.random()*2600;
+    timer=setTimeout(goNow, delay);
+  }
+  function goNow(){
+    state='go'; setPad('go');
+    big.textContent='CLIC !';
+    big.style.fontSize='64px';
+    sub.style.display='none';
+    startTime=performance.now();
+  }
+  function showResult(ms){
+    state='result'; setPad('');
+    var isBest=saveBest(ms);
+    big.innerHTML='<span id="ms">'+ms+'<small> ms</small></span>';
+    big.style.fontSize='';
+    sub.style.display='';
+    sub.innerHTML='<span id="verdict">'+verdict(ms)+(isBest?' — nouveau record !':'')+'</span><br>Clique pour rejouer';
+    loadBest();
+  }
+  function tooSoon(){
+    if(timer){clearTimeout(timer);timer=null;}
+    state='tooSoon'; setPad('');
+    big.textContent='Trop tôt !';
+    big.style.fontSize='40px';
+    sub.style.display='';
+    sub.textContent='Tu as cliqué avant le orange. Clique pour réessayer.';
+  }
+
+  function trigger(){
+    if(state==='idle'||state==='result'||state==='tooSoon'){ startWaiting(); }
+    else if(state==='waiting'){ tooSoon(); }
+    else if(state==='go'){ showResult(Math.round(performance.now()-startTime)); }
+  }
+
+  pad.addEventListener('click',trigger);
+  pad.addEventListener('touchstart',function(e){e.preventDefault();trigger();},{passive:false});
+  document.addEventListener('keydown',function(e){
+    if(e.code==='Space'||e.key===' '){ e.preventDefault(); trigger(); }
+  });
+
+  loadBest(); toIdle();
+})();
+</script>
+</body>
+</html>
