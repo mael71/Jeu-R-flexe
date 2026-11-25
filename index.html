@@ -53,8 +53,12 @@
 <script src="https://browser.sentry-cdn.com/8.55.0/bundle.min.js" crossorigin="anonymous"></script>
 <script>
   if (window.Sentry) {
+    // Pour contourner les bloqueurs de pub (uBlock, Brave…), colle ici l'URL de ton
+    // Worker Cloudflare (voir sentry-tunnel/README.md). Vide = envoi direct à Sentry.
+    var SENTRY_TUNNEL = "";
     Sentry.init({
       dsn: "https://c440380ec0aa1f2cf8b33b4e15154a54@o4512486347243520.ingest.de.sentry.io/4512487643938896",
+      tunnel: SENTRY_TUNNEL || undefined,
       release: "jeu-reflexe@1.0.0",
       environment: "production"
     });
