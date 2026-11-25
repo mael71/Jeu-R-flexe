@@ -169,7 +169,16 @@
     errbar.style.display='block';
   });
   document.getElementById('bug').addEventListener('click',function(){
-    throw new Error("Erreur de test déclenchée par le bouton (jeu Réflexe)");
+    var err = new Error("Erreur déclenchée par le bouton (jeu Réflexe)");
+    if (window.Sentry && Sentry.captureException) {
+      Sentry.captureException(err);                 // envoi explicite = fiable
+      errbar.style.background = '#1e5c2e';
+      errbar.textContent = "Erreur envoyée à Sentry ✓ — " + err.message;
+    } else {
+      errbar.style.background = '#7a1d0e';
+      errbar.textContent = "Sentry n'est pas chargé (bloqué par une extension ?) — erreur NON envoyée";
+    }
+    errbar.style.display = 'block';
   });
 
   loadBest(); toIdle();
